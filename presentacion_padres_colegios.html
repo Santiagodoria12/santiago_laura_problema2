@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#f0f0f0;overflow:hidden;height:100vh}
+.deck{width:100%;height:100vh;position:relative}
+.slide{position:absolute;top:0;left:0;width:100%;height:100vh;padding:36px 52px 30px;display:none;flex-direction:column;background:#0a0a0a;overflow:hidden}
+.slide.active{display:flex}
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;z-index:100;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:6px 16px;border-radius:40px}
+.nav button{background:none;border:1px solid rgba(255,255,255,0.15);color:#ccc;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:11px}
+.nav button:hover{background:#1a6e9e;border-color:#1a6e9e;color:#fff}
+.dot-nav{display:flex;gap:6px;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all .2s}
+.dot.active{background:#2196f3;width:16px;border-radius:3px}
+.sc2{font-size:10px;color:rgba(255,255,255,0.3);min-width:28px;text-align:center}
+.lbl{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:#2196f3;margin-bottom:4px;font-weight:500}
+.ttl{font-size:26px;font-weight:600;line-height:1.15;color:#fff}
+.ttl span{color:#2196f3}
+.sub{font-size:11.5px;color:rgba(255,255,255,0.38);margin-top:3px}
+.div{width:32px;height:3px;background:#2196f3;margin:8px 0 14px;border-radius:2px}
+.logo{position:absolute;top:14px;right:52px;font-size:9px;color:rgba(255,255,255,0.13);letter-spacing:1px;text-transform:uppercase}
+.team{position:fixed;bottom:48px;right:36px;font-size:9.5px;color:rgba(255,255,255,0.16);text-align:right}
+
+/* accent colors — blue theme */
+.ACC{color:#2196f3}
+.ACC2{color:#f59e0b}
+.ACC3{color:#e05252}
+
+/* S1 */
+.s1top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.kc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px 14px;position:relative;overflow:hidden}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#2196f3}
+.kc.r::before{background:#e05252}.kc.a::before{background:#f59e0b}
+.kbig{font-size:28px;font-weight:700;color:#2196f3;line-height:1;margin-bottom:3px}
+.kc.r .kbig{color:#e05252}.kc.a .kbig{color:#f59e0b}
+.klbl{font-size:10.5px;color:rgba(255,255,255,0.5);line-height:1.35}
+.ksrc{font-size:9px;color:rgba(255,255,255,0.2);margin-top:3px;font-style:italic}
+.s1mid{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:11px 16px;margin-bottom:10px}
+.s1mid p{font-size:11.5px;color:rgba(255,255,255,0.62);line-height:1.6}
+.s1mid .hi{color:#2196f3;font-weight:600}.s1mid .re{color:#f59e0b;font-weight:600}
+.s1bot{display:grid;grid-template-columns:1.05fr 0.95fr;gap:10px;flex:1}
+.cc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px 14px}
+.ct{font-size:9.5px;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:500}
+.br{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.brl{font-size:10.5px;color:rgba(255,255,255,0.5);width:110px;text-align:right;flex-shrink:0}
+.brt{flex:1;height:15px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
+.brf{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9.5px;font-weight:600}
+.brf.b{background:#1565c0;color:#90caf9}.brf.r2{background:#7a2a2a;color:#f0a8a8}.brf.a2{background:#78520a;color:#fde68a}.brf.g{background:#1a5c2a;color:#a8f0c0}
+.dtags{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.dtag{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:3px 8px;font-size:9.5px;color:rgba(255,255,255,0.45)}
+.dtag span{color:#f59e0b;font-weight:600}
+.enun{background:rgba(33,150,243,0.06);border:1px solid rgba(33,150,243,0.2);border-radius:9px;padding:12px 14px;height:100%;display:flex;flex-direction:column;justify-content:center}
+.elbl{font-size:9.5px;color:#2196f3;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-weight:500}
+.enun p{font-size:11px;color:rgba(255,255,255,0.65);line-height:1.6}
+.enun .h{color:#fff;font-weight:600}
+.enun .g{color:#2196f3;font-weight:600}
+
+/* S2 */
+#s2{padding:28px 36px 24px}
+.em-container{flex:1;position:relative;overflow:hidden}
+
+/* S3 */
+.ug{display:grid;grid-template-columns:1fr 1fr;gap:11px;flex:1}
+.ul{display:flex;flex-direction:column;gap:9px}
+.mo{background:rgba(33,150,243,0.08);border:1px solid rgba(33,150,243,0.28);border-radius:9px;padding:14px 16px;flex:1}
+.mol{font-size:9.5px;text-transform:uppercase;letter-spacing:1.5px;color:#2196f3;margin-bottom:7px;font-weight:600}
+.mot{font-size:12.5px;color:rgba(255,255,255,0.8);line-height:1.6}
+.mot strong{color:#fff;font-weight:600}
+.op{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 13px}
+.opl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.28);margin-bottom:3px}
+.opt{font-size:11.5px;color:rgba(255,255,255,0.68);line-height:1.5}
+.opm{display:inline-block;background:rgba(33,150,243,0.14);border:1px solid rgba(33,150,243,0.28);border-radius:4px;padding:2px 7px;font-size:9.5px;color:#2196f3;margin-top:4px;font-weight:600}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ci{background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 10px;border-left:2px solid #2196f3}
+.ctit{font-size:9.5px;font-weight:600;color:#2196f3;margin-bottom:2px}
+.cdesc{font-size:9.5px;color:rgba(255,255,255,0.42);line-height:1.4}
+
+/* S4 */
+.stg{display:grid;grid-template-columns:1fr 1fr;gap:11px;flex:1}
+.stc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:15px 17px}
+.stn{font-size:28px;font-weight:700;color:rgba(33,150,243,0.16);line-height:1;margin-bottom:7px}
+.sttl{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px}
+.std{font-size:11px;color:rgba(255,255,255,0.48);line-height:1.55}
+.sttag{display:inline-block;background:rgba(33,150,243,0.11);border:1px solid rgba(33,150,243,0.22);border-radius:4px;padding:2px 8px;font-size:9px;color:#2196f3;margin-top:7px;letter-spacing:0.5px;text-transform:uppercase}
+.sti{margin-top:8px}
+.stit{font-size:10.5px;color:rgba(255,255,255,0.42);margin-bottom:3px;padding-left:11px;position:relative}
+.stit::before{content:'';position:absolute;left:0;top:7px;width:5px;height:1px;background:#2196f3}
+.rat{background:rgba(33,150,243,0.05);border:1px solid rgba(33,150,243,0.13);border-radius:7px;padding:10px 14px;margin-top:9px}
+.rat p{font-size:10.5px;color:rgba(255,255,255,0.42);line-height:1.55}
+.rat strong{color:rgba(255,255,255,0.72)}
+
+/* S5 */
+.rc{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;flex:1;align-content:start}
+.ri{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.ra{font-size:10.5px;color:rgba(255,255,255,0.67);line-height:1.45}
+.ra strong{color:#fff}
+.rs{font-size:9.5px;color:rgba(33,150,243,0.62);margin-top:1px}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ══ S1: PROBLEMA ══ -->
+<div class="slide active" id="s1">
+  <div class="logo">UX Research · 2025</div>
+  <div class="lbl">01 — Definición del problema</div>
+  <div class="ttl">9.5 millones de estudiantes. <span>Pero sus padres no pueden seguirlos.</span></div>
+  <div class="sub">La brecha digital entre familias y colegios en Colombia.</div>
+  <div class="div"></div>
+
+  <div class="s1top">
+    <div class="kc">
+      <div class="kbig">9.5M</div>
+      <div class="klbl">estudiantes en educación básica y media</div>
+      <div class="ksrc">DANE, Educación Formal 2023</div>
+    </div>
+    <div class="kc a">
+      <div class="kbig">5%</div>
+      <div class="klbl">de colegios públicos tiene un sistema LMS</div>
+      <div class="ksrc">LEE Javeriana, Informe No. 113, 2025</div>
+    </div>
+    <div class="kc r">
+      <div class="kbig">27%</div>
+      <div class="klbl">de colegios públicos envía reportes digitales a padres</div>
+      <div class="ksrc">LEE Javeriana, Informe No. 113, 2025</div>
+    </div>
+  </div>
+
+  <div class="s1mid">
+    <p>Colombia tiene <span class="hi">9.5 millones de estudiantes matriculados</span> en educación básica y media, de los cuales el <span class="hi">82.7% asiste a colegios públicos</span>. Sin embargo, solo el <span class="re">5% de esos colegios tiene un LMS</span> y apenas el <span class="re">27% envía reportes académicos digitales</span> a los padres. La evidencia científica es clara: el involucramiento parental tiene un tamaño de efecto de <span class="hi">d = 0.50</span> sobre el rendimiento académico (Hattie, 2017), equivalente a un año adicional de aprendizaje. El problema no es la motivación de los padres, es que las herramientas no fueron diseñadas para ellos.</p>
+  </div>
+
+  <div class="s1bot">
+    <div class="cc">
+      <div class="ct">Brecha digital en colegios colombianos — LEE Javeriana 2025</div>
+      <div class="br"><div class="brl">Colegios privados LMS</div><div class="brt"><div class="brf b" style="width:76%">19%</div></div></div>
+      <div class="br"><div class="brl">Colegios públicos LMS</div><div class="brt"><div class="brf r2" style="width:20%">5%</div></div></div>
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:6px 0"></div>
+      <div class="br"><div class="brl">Privados con reportes digitales</div><div class="brt"><div class="brf b" style="width:100%">63%</div></div></div>
+      <div class="br"><div class="brl">Públicos con reportes digitales</div><div class="brt"><div class="brf a2" style="width:43%">27%</div></div></div>
+      <div class="br"><div class="brl">Rurales con reportes digitales</div><div class="brt"><div class="brf r2" style="width:35%">22%</div></div></div>
+      <div style="height:1px;background:rgba(255,255,255,0.05);margin:6px 0"></div>
+      <div class="br"><div class="brl">Hogares con smartphone</div><div class="brt"><div class="brf g" style="width:100%">90.3%</div></div></div>
+      <div class="br"><div class="brl">Hogares con computador</div><div class="brt"><div class="brf a2" style="width:53%">34%</div></div></div>
+      <div class="br"><div class="brl">Hogares rurales con internet</div><div class="brt"><div class="brf r2" style="width:65%">41.9%</div></div></div>
+      <div class="dtags">
+        <div class="dtag">35% padres sin bachillerato</div>
+        <div class="dtag">d=0.50 <span>efecto parental</span></div>
+        <div class="dtag">WhatsApp: canal dominante</div>
+      </div>
+    </div>
+
+    <div class="enun">
+      <div class="elbl">Enunciado del problema</div>
+      <p>Los padres de familia en Colombia <span class="h">quieren seguir el avance escolar de sus hijos</span>, pero enfrentan un ecosistema digital fragmentado, plataformas institucionales con problemas severos de usabilidad y una brecha de alfabetización que hace que <span class="h">la solución obvia (la plataforma del colegio) sea la más difícil de usar</span>. La oferta digital existente fue diseñada para administradores y docentes, no para padres. <span class="g">El 90.3% tiene smartphone, pero solo el 5% de colegios públicos tiene un LMS.</span> La barrera no es tecnológica, es de diseño.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S2: MAPA EMPATÍA ══ -->
+<div class="slide" id="s2">
+  <div class="logo">UX Research · 2025</div>
+  <div class="lbl">02 — Mapa de empatía</div>
+  <div class="ttl">¿Quién es nuestro <span>usuario?</span></div>
+  <div class="sub">Padre o madre de familia con hijo en colegio público o privado de primaria o secundaria, 30 a 50 años, con smartphone básico pero sin habilidades digitales avanzadas</div>
+  <div class="div"></div>
+
+  <div class="em-container">
+    <svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+      <polygon points="0,0 480,0 480,215 0,215" fill="#0d1624" stroke="#1a3a5a" stroke-width="0.8"/>
+      <polygon points="480,0 960,0 960,215 480,215" fill="#0d1624" stroke="#1a3a5a" stroke-width="0.8"/>
+      <polygon points="0,0 0,430 480,215" fill="#0b1828" stroke="#122040" stroke-width="0.8"/>
+      <polygon points="960,0 960,430 480,215" fill="#0b1828" stroke="#122040" stroke-width="0.8"/>
+      <polygon points="0,430 960,430 480,215" fill="#0c1020" stroke="#1a2040" stroke-width="0.8"/>
+      <line x1="0" y1="0" x2="480" y2="215" stroke="#2196f3" stroke-width="0.4" opacity="0.35"/>
+      <line x1="960" y1="0" x2="480" y2="215" stroke="#2196f3" stroke-width="0.4" opacity="0.35"/>
+      <line x1="0" y1="430" x2="480" y2="215" stroke="#2196f3" stroke-width="0.4" opacity="0.35"/>
+      <line x1="960" y1="430" x2="480" y2="215" stroke="#2196f3" stroke-width="0.4" opacity="0.35"/>
+      <line x1="480" y1="0" x2="480" y2="95" stroke="#2196f3" stroke-width="0.4" opacity="0.35"/>
+
+      <!-- Head -->
+      <circle cx="480" cy="215" r="112" fill="#091018" stroke="#2196f3" stroke-width="1.8"/>
+      <path d="M 370 215 Q 352 200 352 215 Q 352 230 370 215" fill="none" stroke="#2196f3" stroke-width="1.4"/>
+      <path d="M 420 302 Q 445 318 480 320 Q 515 318 540 302" fill="none" stroke="#2196f3" stroke-width="0.9"/>
+      <line x1="480" y1="168" x2="480" y2="195" stroke="#2196f3" stroke-width="0.8" opacity="0.5"/>
+
+      <!-- Inside circle -->
+      <text x="480" y="147" text-anchor="middle" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif" letter-spacing="1">QUE PIENSAN Y SIENTEN</text>
+      <line x1="480" y1="154" x2="480" y2="278" stroke="#2196f3" stroke-width="0.6" opacity="0.4"/>
+      <line x1="378" y1="215" x2="582" y2="215" stroke="#2196f3" stroke-width="0.6" opacity="0.4"/>
+
+      <!-- DOLORES -->
+      <text x="410" y="167" text-anchor="middle" font-size="7" font-weight="700" fill="#e05252" font-family="-apple-system,sans-serif">DOLORES</text>
+      <text x="388" y="180" font-size="6.5" fill="rgba(255,255,255,0.6)" font-family="-apple-system,sans-serif">Miedo a parecer "mal padre."</text>
+      <text x="388" y="193" font-size="6.5" fill="rgba(255,255,255,0.6)" font-family="-apple-system,sans-serif">Plataformas que no entiende.</text>
+      <text x="388" y="206" font-size="6.5" fill="rgba(255,255,255,0.6)" font-family="-apple-system,sans-serif">Enterarse tarde de problemas.</text>
+
+      <!-- GANANCIAS -->
+      <text x="550" y="167" text-anchor="middle" font-size="7" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">GANANCIAS</text>
+      <text x="490" y="180" font-size="6.5" fill="rgba(255,255,255,0.6)" font-family="-apple-system,sans-serif">Saber como va su hijo hoy.</text>
+      <text x="490" y="193" font-size="6.5" fill="rgba(255,255,255,0.6)" font-family="-apple-system,sans-serif">Comunicarse facil con el profesor.</text>
+      <text x="490" y="206" font-size="6.5" fill="rgba(255,255,255,0.6)" font-family="-apple-system,sans-serif">Actuar antes de que sea tarde.</text>
+
+      <text x="480" y="262" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.28)" font-family="-apple-system,sans-serif">¿Que pensamientos podrian motivar su comportamiento?</text>
+
+      <!-- OBJETIVO -->
+      <text x="480" y="10" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff" font-family="-apple-system,sans-serif" letter-spacing="3">OBJETIVO</text>
+
+      <!-- 1 CON QUIEN — right-anchored mirrors QUE NECESITAN -->
+      <text x="390" y="20" text-anchor="end" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">1  CON QUIEN EMPATIZAMOS</text>
+      <text x="390" y="35" text-anchor="end" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Padre o madre, 30 a 50 anos, hijo en colegio</text>
+      <text x="390" y="47" text-anchor="end" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">publico o privado, con smartphone pero sin</text>
+      <text x="390" y="59" text-anchor="end" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">habilidades digitales avanzadas.</text>
+
+      <!-- 2 QUE NECESITAN -->
+      <text x="570" y="20" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">2  QUE NECESITAN HACER</text>
+      <text x="570" y="35" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Ver notas y asistencia en tiempo real.</text>
+      <text x="570" y="47" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Comunicarse directamente con el docente.</text>
+      <text x="570" y="59" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Entender las plataformas sin capacitacion.</text>
+
+      <!-- 3 QUE VEN — right edge -->
+      <text x="740" y="148" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">3  QUE VEN</text>
+      <text x="740" y="162" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Plataformas distintas por colegio y docente.</text>
+      <text x="740" y="174" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">WhatsApp lleno de mensajes del salon.</text>
+      <text x="740" y="186" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Otros padres igual de confundidos.</text>
+
+      <!-- 4 QUE DICEN — right edge -->
+      <text x="740" y="248" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">4  QUE DICEN</text>
+      <text x="740" y="262" font-size="8" fill="rgba(255,255,255,0.55)" font-family="-apple-system,sans-serif" font-style="italic">"No entiendo como funciona eso."</text>
+      <text x="740" y="274" font-size="8" fill="rgba(255,255,255,0.55)" font-family="-apple-system,sans-serif" font-style="italic">"Me entero de las notas en la reunion."</text>
+      <text x="740" y="286" font-size="8" fill="rgba(255,255,255,0.55)" font-family="-apple-system,sans-serif" font-style="italic">"Prefiero preguntar al nino directo."</text>
+
+      <!-- 5 QUE HACEN — centered -->
+      <text x="480" y="340" text-anchor="middle" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">5  QUE HACEN</text>
+      <text x="480" y="356" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Usan WhatsApp como unica herramienta de comunicacion con el colegio.</text>
+      <text x="480" y="368" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Esperan la reunion de padres para conocer el avance academico del hijo.</text>
+      <text x="480" y="380" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Ignoran o desinstalan las apps del colegio por ser confusas o inestables.</text>
+
+      <!-- 6 QUE ESCUCHAN -->
+      <text x="18" y="182" font-size="9.5" font-weight="700" fill="#2196f3" font-family="-apple-system,sans-serif">6  QUE ESCUCHAN</text>
+      <text x="18" y="196" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Colegio: "descargue la app para ver notas."</text>
+      <text x="18" y="208" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Docente: "le mando el informe por WhatsApp."</text>
+      <text x="18" y="220" font-size="8" fill="rgba(255,255,255,0.65)" font-family="-apple-system,sans-serif">Otros padres: "yo tampoco le entiendo a eso."</text>
+
+      <rect x="1" y="1" width="958" height="428" fill="none" stroke="#2196f3" stroke-width="0.8" opacity="0.3" rx="3"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ══ S3: OBJETIVO UX ══ -->
+<div class="slide" id="s3">
+  <div class="logo">UX Research · 2025</div>
+  <div class="lbl">03 — Objetivo de marketing en UX</div>
+  <div class="ttl">Del hallazgo al <span>objetivo estratégico</span></div>
+  <div class="sub">Centrado en el usuario, medible, orientado a la acción, generador de valor mutuo</div>
+  <div class="div"></div>
+  <div class="ug">
+    <div class="ul">
+      <div class="mo">
+        <div class="mol">Objetivo de marketing en UX</div>
+        <div class="mot"><strong>Diseñar una experiencia digital de seguimiento académico</strong> que elimine las barreras de acceso para padres de familia en Colombia con hijos en primaria y secundaria, logrando que el <strong>60% de los padres que se registran consulten el avance académico de su hijo al menos una vez por semana</strong>, a través de una interfaz mobile-first, lenguaje claro y flujo de un solo toque, medido por tasa de retención semanal en los primeros 30 días.</div>
+      </div>
+      <div class="op">
+        <div class="opl">Hallazgo que lo origina</div>
+        <div class="opt">Solo el 5% de colegios públicos tiene LMS y el 27% envía reportes digitales. El 90.3% de padres tiene smartphone pero las plataformas existentes son tan difíciles que los padres las desinstalan y vuelven a WhatsApp.</div>
+        <div class="opm">LEE Javeriana 2025, DANE TIC 2023</div>
+      </div>
+    </div>
+    <div>
+      <div class="op" style="margin-bottom:9px"><div class="opl">Características del objetivo (marco del curso, Universidad de La Sabana)</div></div>
+      <div class="cg">
+        <div class="ci"><div class="ctit">Centrado en el usuario</div><div class="cdesc">Parte del mapa de empatía: confusión con plataformas, enterarse tarde, miedo a parecer mal padre.</div></div>
+        <div class="ci"><div class="ctit">Medible</div><div class="cdesc">Retención semanal 30 días, frecuencia de consulta de notas, NPS de padres post-onboarding.</div></div>
+        <div class="ci"><div class="ctit">Orientado a la acción</div><div class="cdesc">Impulsa cambios en el flujo de acceso, arquitectura de la información y notificaciones push.</div></div>
+        <div class="ci"><div class="ctit">Generador de valor mutuo</div><div class="cdesc">Para el padre: tranquilidad y control. Para el colegio: mayor participación y confianza institucional.</div></div>
+        <div class="ci"><div class="ctit">Conectado con la marca</div><div class="cdesc">Promesa: el seguimiento académico más simple del mercado, diseñado para el padre colombiano.</div></div>
+        <div class="ci"><div class="ctit">Nuevo segmento</div><div class="cdesc">Replantear flujos para padres con baja alfabetización digital, no para administradores escolares.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S4: NEXT STEPS ══ -->
+<div class="slide" id="s4">
+  <div class="logo">UX Research · 2025</div>
+  <div class="lbl">04 — Próximos pasos</div>
+  <div class="ttl">Validar con <span>el usuario real</span></div>
+  <div class="sub">Los datos dan el diagnóstico. La investigación cualitativa da el diseño.</div>
+  <div class="div"></div>
+  <div class="stg">
+    <div class="stc">
+      <div class="stn">01</div>
+      <div class="sttl">Entrevistas a profundidad o focus group</div>
+      <div class="std">Método de investigación cualitativa por definir con el docente. El objetivo es explorar el journey del padre: desde que recibe la notificación de que debe revisar las notas hasta que lo intenta, lo logra o lo abandona. Ambas opciones permiten identificar los puntos exactos de fricción con las plataformas digitales actuales.</div>
+      <div class="sttag">Por definir con el docente</div>
+      <div class="sti">
+        <div class="stit">Perfil: padres 30 a 50 años, hijo en colegio público, smartphone básico</div>
+        <div class="stit">Ejes: experiencia con plataformas actuales, barreras de adopción, canal preferido</div>
+        <div class="stit">Entregable: mapa de patrones y frases clave del usuario real</div>
+      </div>
+    </div>
+    <div class="stc">
+      <div class="stn">02</div>
+      <div class="sttl">Síntesis y definición de persona</div>
+      <div class="std">Con los hallazgos de la investigación cualitativa, construir la persona primaria validada con citas reales del padre y el customer journey map completo como base del diseño de la solución digital.</div>
+      <div class="sttag">Síntesis UX</div>
+      <div class="sti">
+        <div class="stit">Output: user persona con citas textuales del padre real</div>
+        <div class="stit">Output: customer journey map con momentos de fricción identificados</div>
+        <div class="stit">Output: lista de principios de diseño priorizados para la solución</div>
+      </div>
+    </div>
+  </div>
+  <div class="rat">
+    <p><strong>¿Por qué investigación cualitativa?</strong> Los datos cuantitativos dicen que el 5% de colegios tiene LMS. La investigación cualitativa revelará <strong>exactamente en qué paso del journey el padre abandona la plataforma</strong>, y eso es lo que el diseño debe resolver primero.</p>
+  </div>
+</div>
+
+<!-- ══ S5: REFERENCIAS ══ -->
+<div class="slide" id="s5">
+  <div class="logo">UX Research · 2025</div>
+  <div class="lbl">05 — Referencias</div>
+  <div class="ttl"><span>Fuentes</span> consultadas</div>
+  <div class="sub">Formato APA 7.ª edición</div>
+  <div class="div"></div>
+  <div class="rc">
+    <div>
+      <div class="ri"><div class="ra"><strong>Beltrán, R.</strong> (2023). Brecha digital después de la pandemia: Indicadores de inclusión digital en el sector educativo. <em>Revista Innova Educación, 5</em>(2), 29-44.</div><div class="rs">doi.org/10.35622/j.rie.2023.02.002</div></div>
+      <div class="ri"><div class="ra"><strong>Castro, M., Expósito-Casas, E., López-Martín, E., Lizasoain, L., Navarro-Asencio, E., y Gaviria, J. L.</strong> (2015). Parental involvement on student academic achievement: A meta-analysis. <em>Educational Research Review, 14</em>(1), 33-46.</div><div class="rs">doi.org/10.1016/j.edurev.2015.01.002</div></div>
+      <div class="ri"><div class="ra"><strong>Cerquera Losada, O. H., Conde Córdoba, K., y Amaya González, M. D.</strong> (2025). Brecha digital y rendimiento académico en Colombia: Acceso a TIC durante la pandemia. <em>RIIEP, 19</em>(1).</div><div class="rs">revistas.usantotomas.edu.co</div></div>
+      <div class="ri"><div class="ra"><strong>DANE.</strong> (2024). <em>Boletín técnico Encuesta de Calidad de Vida (ECV) 2024.</em></div><div class="rs">dane.gov.co/files/operaciones/ECV/bol-ECV-2024.pdf</div></div>
+      <div class="ri"><div class="ra"><strong>DANE.</strong> (2024). <em>Boletín técnico TIC en Hogares (TICH) 2023.</em></div><div class="rs">dane.gov.co/files/operaciones/TICH/bol-TICH-2023.pdf</div></div>
+      <div class="ri"><div class="ra"><strong>Gómez-Navas, D., y Marín-Riva, M. P.</strong> (2023). Educación en confinamiento en Colombia: Una mirada a las relaciones familia-escuela en tiempos de pandemia. <em>Revista Mexicana de Investigación Educativa, 28</em>(98), 837-862.</div><div class="rs">redalyc.org/journal/140/14075704007</div></div>
+      <div class="ri"><div class="ra"><strong>Hattie, J.</strong> (2017). <em>Visible learning: A synthesis of over 800+ meta-analyses relating to achievement</em> (actualización). Routledge.</div><div class="rs">visible-learning.org</div></div>
+    </div>
+    <div>
+      <div class="ri"><div class="ra"><strong>Jeynes, W. H.</strong> (2005). Parental involvement and student achievement: A meta-analysis. <em>Educational Research Review, 14</em>(3), 48-60.</div><div class="rs">doi.org/10.3102/00346543075001001</div></div>
+      <div class="ri"><div class="ra"><strong>Laboratorio de Economía de la Educación [LEE], Pontificia Universidad Javeriana.</strong> (2025). <em>Informe No. 113: Tecnologías de la información en las aulas colombianas: usos y oportunidades.</em></div><div class="rs">javeriana.edu.co/recursosdb/d/lee/inf-113-tic-en-educacion-lee-2025</div></div>
+      <div class="ri"><div class="ra"><strong>Ministerio de Educación Nacional [MEN].</strong> (2025). <em>Boletín estadístico: Establecimientos y sedes 2015-2024.</em></div><div class="rs">portalsineb.mineducacion.gov.co</div></div>
+      <div class="ri"><div class="ra"><strong>OCDE.</strong> (2025). <em>Education at a Glance 2025: Colombia.</em></div><div class="rs">oecd.org/en/publications/education-at-a-glance-2025</div></div>
+      <div class="ri"><div class="ra"><strong>Sağlam, H. İ., y Yüksel, İ.</strong> (2021). Parents' acceptance of educational technology: Lessons from around the world. <em>Frontiers in Psychology, 12</em>, 719430.</div><div class="rs">doi.org/10.3389/fpsyg.2021.719430</div></div>
+      <div class="ri"><div class="ra"><strong>Thompson, B. C., Mazer, J. P., y Grady, E. F.</strong> (2015). The changing nature of parent-teacher communication: Mode selection in the smartphone era. <em>Communication Education, 64</em>(2), 187-207.</div><div class="rs">doi.org/10.1080/03634523.2015.1014382</div></div>
+      <div class="ri"><div class="ra"><strong>Wilder, S.</strong> (2014). Effects of parental involvement on academic achievement: A meta-synthesis. <em>Educational Review, 66</em>(3), 377-397.</div><div class="rs">doi.org/10.1080/00131911.2013.780009</div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button onclick="go(-1)">Anterior</button>
+  <div class="dot-nav" id="dots"></div>
+  <button onclick="go(1)">Siguiente</button>
+  <span class="sc2" id="cnt">1 / 5</span>
+</div>
+<div class="team">Laura Izquierdo · Santiago Doria</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),dotsEl=document.getElementById('dots'),cntEl=document.getElementById('cnt');
+let cur=0;
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>show(i);dotsEl.appendChild(d);});
+function show(n){slides[cur].classList.remove('active');dotsEl.children[cur].classList.remove('active');cur=(n+slides.length)%slides.length;slides[cur].classList.add('active');dotsEl.children[cur].classList.add('active');cntEl.textContent=(cur+1)+' / '+slides.length;}
+function go(d){show(cur+d);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>
